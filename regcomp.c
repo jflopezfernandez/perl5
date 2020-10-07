@@ -1259,7 +1259,6 @@ S_debug_studydata(pTHX_ const char *where, scan_data_t *data,
         );
 
         if (data->last_found) {
-            int i;
             Perl_re_printf(aTHX_
                 "Last:'%s' %" IVdf ":%" IVdf "/%" IVdf,
                     SvPVX_const(data->last_found),
@@ -1268,7 +1267,7 @@ S_debug_studydata(pTHX_ const char *where, scan_data_t *data,
                     (IV)data->last_start_max
             );
 
-            for (i = 0; i < 2; i++) {
+            for (int i = 0; i < 2; i++) {
                 Perl_re_printf(aTHX_
                     " %s%s: '%s' @ %" IVdf "/%" IVdf,
                     data->cur_is_floating == i ? "*" : "",
