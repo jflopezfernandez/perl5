@@ -296,15 +296,36 @@ EOP
         -$width, REGMATCH_STATE_MAX => $#all;
 
     my %rev_type_alias= reverse %type_alias;
-    my $format = "#define\t%*s\t%d\t/* %#04x %s */\n";
-    for my $node (@ops) {
-        printf $out $format,
-            -$width, $node->{name}, $node->{id}, $node->{id}, $node->{comment};
-        if ( defined( my $alias= $rev_type_alias{ $node->{name} } ) ) {
+    my $format = "#define %*s\t%d\t/* %#04x %s */\n";
+    my @withs;
+    my $in_states = 0;
+    for my $ref (\@ops, \@states) {
+        if (! $in_states && $ref == \@states) {
+            $in_states = 1;
+            print $out "\t/* ------------ States ------------- */\n";
+        }
+        for my $node ($ref->@*) {
             printf $out $format,
-                -$width, $alias, $node->{id}, $node->{id}, "type alias";
+                -$width, $node->{name}, $node->{id}, $node->{id}, $node->{comment};
+            if ( defined( my $alias= $rev_type_alias{ $node->{name} } ) ) {
+                printf $out $format,
+                    -$width, $alias, $node->{id}, $node->{id}, "type alias";
+            }
+            my $id = 4 * $node->{id};
+            printf $out $format,
+                -$width, "$node->{name}_tb_pb", $id, $id, $node->{comment};
+            $id++;
+            printf $out $format,
+                -$width, "$node->{name}_tb_p8", $id, $id, "";
+            $id++;
+            printf $out $format,
+                -$width, "$node->{name}_t8_pb", $id, $id, "";
+            $id++;
+            printf $out $format,
+                -$width, "$node->{name}_t8_p8", $id, $id, "";
         }
     }
+
     print $out <<EOT;
 \t/* -- For regexec.c to switch on target being utf8 (t8)
 \t * or not (tb, b='byte'); same with pattern (p8, pb) -- */
@@ -312,26 +333,6 @@ EOP
 \t\t(((op) << 2) + (cBOOL(t_utf8) << 1) + cBOOL(p_utf8))
 
 EOT
-    for my $node (@ops) {
-        my $id = 4 * $node->{id};
-        printf $out $format,
-            -$width, "$node->{name}_tb_pb", $id, $id, "";
-        $id++;
-        printf $out $format,
-            -$width, "$node->{name}_tb_p8", $id, $id, "";
-        $id++;
-        printf $out $format,
-            -$width, "$node->{name}_t8_pb", $id, $id, "";
-        $id++;
-        printf $out $format,
-            -$width, "$node->{name}_t8_p8", $id, $id, "";
-    }
-
-    print $out "\t/* ------------ States ------------- */\n";
-    for my $node (@states) {
-        printf $out "#define\t%*s\t(REGNODE_MAX + %d)\t/* %s */\n",
-            -$width, $node->{name}, $node->{id} - $#ops, $node->{comment};
-    }
 }
 
 sub print_regkind {
