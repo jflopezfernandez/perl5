@@ -170,7 +170,7 @@ DEFAULT_INC_EXCLUDES_DOT *= define
 #
 # Uncomment this if you want to build everything in C++ mode
 #
-USE_CPLUSPLUS	*= define
+#USE_CPLUSPLUS	*= define
 
 #
 # uncomment next line if you want debug version of perl (big/slow)
