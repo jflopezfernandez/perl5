@@ -1255,7 +1255,7 @@ struct xsub_details {
 };
 
 static const struct xsub_details these_details[] = {
-    {"UNIVERSAL::isa", XS_UNIVERSAL_isa, NULL, 0 },
+    { .name = "UNIVERSAL::isa", .proto = NULL, .ix =0 , .xsub = XS_UNIVERSAL_isa },
     {"UNIVERSAL::can", XS_UNIVERSAL_can, NULL, 0 },
     {"UNIVERSAL::DOES", XS_UNIVERSAL_DOES, NULL, 0 },
 #define VXS_XSUB_DETAILS

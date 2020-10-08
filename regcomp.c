@@ -1259,6 +1259,7 @@ S_debug_studydata(pTHX_ const char *where, scan_data_t *data,
         );
 
         if (data->last_found) {
+            int i;
             Perl_re_printf(aTHX_
                 "Last:'%s' %" IVdf ":%" IVdf "/%" IVdf,
                     SvPVX_const(data->last_found),
@@ -1267,7 +1268,7 @@ S_debug_studydata(pTHX_ const char *where, scan_data_t *data,
                     (IV)data->last_start_max
             );
 
-            for (int i = 0; i < 2; i++) {
+            for (i = 0; i < 2; i++) {
                 Perl_re_printf(aTHX_
                     " %s%s: '%s' @ %" IVdf "/%" IVdf,
                     data->cur_is_floating == i ? "*" : "",
@@ -1571,7 +1572,8 @@ S_ssc_is_anything(const regnode_ssc *ssc)
 
     /* If e.g., both \w and \W are set, matches everything */
     if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
-        for (int i = 0; i < ANYOF_POSIXL_MAX; i += 2) {
+        int i;
+        for (i = 0; i < ANYOF_POSIXL_MAX; i += 2) {
             if (ANYOF_POSIXL_TEST(ssc, i) && ANYOF_POSIXL_TEST(ssc, i+1)) {
                 return TRUE;
             }
@@ -1658,6 +1660,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     SV* invlist = NULL;
     SV* only_utf8_locale_invlist = NULL;
+    unsigned int i;
     const U32 n = ARG(node);
     bool new_node_has_latin1 = FALSE;
     const U8 flags = (inRANGE(OP(node), ANYOFH, ANYOFRb))
@@ -1716,7 +1719,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     /* Add in the points from the bit map */
     if (! inRANGE(OP(node), ANYOFH, ANYOFRb)) {
-        for (unsigned int i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
+        for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
             if (ANYOF_BITMAP_TEST(node, i)) {
                 unsigned int start = i++;
 
@@ -1986,6 +1989,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * another SSC or a regular ANYOF class.  Can create false positives if
      * 'or_with' is to be inverted. */
 
+    SV* ored_cp_list;
     U8 ored_flags;
     U8  or_with_flags = inRANGE(OP(or_with), ANYOFH, ANYOFRb)
                          ? 0
@@ -1997,7 +2001,6 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
     /* 'or_with' is used as-is if it too is an SSC; otherwise have to extract
      * the code point inversion list and just the relevant flags */
-    SV* ored_cp_list;
     if (is_ANYOF_SYNTHETIC(or_with)) {
         ored_cp_list = ((regnode_ssc*) or_with)->invlist;
         ored_flags = or_with_flags;
